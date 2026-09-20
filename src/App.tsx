@@ -16,6 +16,7 @@ function App() {
   const [seconds, setSeconds] = useState(25 * 60)
   const [running, setRunning] = useState(false)
   const [adding, setAdding] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   useEffect(() => { localStorage.setItem('simple-tasks', JSON.stringify(tasks)) }, [tasks])
   useEffect(() => {
     if (!running) return
@@ -35,12 +36,30 @@ function App() {
     setDraft(''); setAdding(false); setFilter('All tasks')
   }
   return (
-    <div className="app-shell">
-      <header className="header">
+    <div className={`app-shell ${sidebarOpen ? 'sidebar-open' : ''}`}>
+      <aside className="sidebar" aria-label="Main navigation">
+        <div className="sidebar-brand"><span className="brand-mark">✳</span><span>simple<span className="brand-dot">.</span></span></div>
+        <button className="sidebar-close" aria-label="Close menu" onClick={() => setSidebarOpen(false)}>×</button>
+        <div className="sidebar-label">WORKSPACE</div>
+        <nav className="sidebar-nav">
+          <a className="sidebar-link active" href="#top" onClick={() => setSidebarOpen(false)}><span className="nav-icon">⌂</span>Overview</a>
+          <a className="sidebar-link" href="#tasks" onClick={() => setSidebarOpen(false)}><span className="nav-icon">✓</span>My tasks<span className="nav-count">{tasks.filter(task => !task.done).length}</span></a>
+          <a className="sidebar-link" href="#focus" onClick={() => setSidebarOpen(false)}><span className="nav-icon">◷</span>Focus timer</a>
+          <a className="sidebar-link" href="#notes" onClick={() => setSidebarOpen(false)}><span className="nav-icon">▤</span>Notes</a>
+        </nav>
+        <div className="sidebar-bottom">
+          <div className="sidebar-label">YOUR PROGRESS</div>
+          <div className="progress-summary"><span className="progress-ring">{complete}</span><div><strong>{complete} of {tasks.length}</strong><span>tasks completed</span></div></div>
+          <div className="sidebar-tip"><span>✦</span><p>Small steps still move you forward.</p></div>
+        </div>
+      </aside>
+      <div className="page-shell" id="top">
+        <header className="header">
+          <button className="menu-toggle" aria-label="Open menu" aria-expanded={sidebarOpen} onClick={() => setSidebarOpen(true)}><span /><span /><span /></button>
         <a className="brand" href="#"><span className="brand-mark">✳</span> simple<span className="brand-dot">.</span></a>
         <div className="header-note">A little less noise. A little more you.</div>
         <div className="avatar" aria-label="Your workspace">S</div>
-      </header>
+        </header>
       <main>
         <section className="intro">
           <div className="eyebrow"><span /> YOUR EVERYDAY, A LITTLE LIGHTER</div>
@@ -58,11 +77,12 @@ function App() {
             <div className="task-list">{visible.map(task => <div className={`task ${task.done ? 'done' : ''}`} key={task.id}><button className="checkbox" aria-label={`${task.done ? 'Mark incomplete' : 'Complete'}: ${task.title}`} aria-pressed={task.done} onClick={() => setTasks(tasks.map(item => item.id === task.id ? { ...item, done: !item.done } : item))}>{task.done ? '✓' : ''}</button><span className="task-title">{task.title}</span><span className={`category ${task.category.toLowerCase()}`}>{task.category}</span><button className="delete-task" aria-label={`Delete ${task.title}`} onClick={() => setTasks(tasks.filter(item => item.id !== task.id))}>×</button></div>)}{!visible.length && <p className="empty">{filter === 'Completed' ? 'Your next small win is waiting.' : 'A little breathing room. You’re all caught up.'}</p>}</div>
             <div className="progress-row"><span>{complete} of {tasks.length} completed</span><div className="progress-track"><div style={{ width: `${tasks.length ? complete / tasks.length * 100 : 0}%` }}/></div><span>Keep it simple ✧</span></div>
           </section>
-          <section className="focus-card"><div className="focus-top"><span>◷ &nbsp; A MOMENT OF FOCUS</span><span className={`status-dot ${running ? 'active' : ''}`} /></div><h3>Be here. Do one thing.</h3><p>Give your attention a little breathing room.</p><div className="timer" role="timer" aria-label="Focus time remaining">{String(Math.floor(seconds / 60)).padStart(2, '0')}<span>:</span>{String(seconds % 60).padStart(2, '0')}</div><div className="timer-controls"><button className="focus-button" onClick={() => { if (!seconds) setSeconds(1500); setRunning(!running) }}>{running ? 'Ⅱ Pause session' : seconds === 0 ? '↻ Start again' : '▷ Start focusing'}</button><button className="reset-button" aria-label="Reset focus timer" onClick={() => { setRunning(false); setSeconds(1500) }}>↻</button></div><span className="timer-note">{seconds === 0 ? 'Well done. Take a little break.' : running ? 'You’ve got this. One moment at a time.' : '25 minutes. Just you and your next step.'}</span></section>
+          <section className="focus-card" id="focus"><div className="focus-top"><span>◷ &nbsp; A MOMENT OF FOCUS</span><span className={`status-dot ${running ? 'active' : ''}`} /></div><h3>Be here. Do one thing.</h3><p>Give your attention a little breathing room.</p><div className="timer" role="timer" aria-label="Focus time remaining">{String(Math.floor(seconds / 60)).padStart(2, '0')}<span>:</span>{String(seconds % 60).padStart(2, '0')}</div><div className="timer-controls"><button className="focus-button" onClick={() => { if (!seconds) setSeconds(1500); setRunning(!running) }}>{running ? 'Ⅱ Pause session' : seconds === 0 ? '↻ Start again' : '▷ Start focusing'}</button><button className="reset-button" aria-label="Reset focus timer" onClick={() => { setRunning(false); setSeconds(1500) }}>↻</button></div><span className="timer-note">{seconds === 0 ? 'Well done. Take a little break.' : running ? 'You’ve got this. One moment at a time.' : '25 minutes. Just you and your next step.'}</span></section>
         </div>
-        <div className="quote"><span>✳</span><p>“Almost everything will work again if you unplug it for a few minutes, including you.”<small>ANNE LAMOTT</small></p></div>
+        <div className="quote" id="notes"><span>✳</span><p>“Almost everything will work again if you unplug it for a few minutes, including you.”<small>ANNE LAMOTT</small></p></div>
       </main>
       <footer><span className="footer-brand">simple.</span><span>A softer place to get things done.</span><span>Made for a more intentional everyday <span className="footer-flower">✳</span></span></footer>
+      </div>
     </div>
   )
 }
